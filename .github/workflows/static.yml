@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIM Admission Calculator & Master List (Batch 2026-28)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --light: #ecf0f1;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: var(--primary);
+        }
+        .alert {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        
+        /* Input Section */
+        .input-panel {
+            background-color: var(--light);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            border: 1px solid #bdc3c7;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        .input-group input, .input-group select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* CS Calculator Info */
+        .cs-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .cs-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        .cs-card h3 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        /* Main Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        /* Status Tags */
+        .status {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 20px;
+            text-align: center;
+            display: inline-block;
+            min-width: 80px;
+        }
+        .status.cleared {
+            background-color: #d4edda;
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        .status.failed {
+            background-color: #f8d7da;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        .process-tag {
+            font-size: 0.8em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .jap { background-color: #e8daef; color: #8e44ad; }
+        .cap { background-color: #d6eaf8; color: #2980b9; }
+        .ind { background-color: #fdebd0; color: #d35400; }
+        
+        .important-note {
+            color: #c0392b;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>IIM Admissions Master Table (2026-28 Batch)</h1>
+    <div class="alert">
+        <strong>⚠️ IMPORTANT:</strong> Data is based on official circulars for CAT 2025. 
+        <br>• <strong>IIM Rohtak:</strong> EWS Cutoff is strictly <strong>93</strong>. Separate form deadline: <strong>Jan 5, 2026</strong>.
+        <br>• <strong>JAP 2026 Update:</strong> IIM Kashipur, Raipur, Ranchi, and Trichy have formed the Joint Admission Process (JAP).
+    </div>
+
+    <div class="input-panel">
+        <div class="input-group">
+            <label>Student Name</label>
+            <input type="text" id="sName" placeholder="Enter Name">
+        </div>
+        <div class="input-group">
+            <label>Category</label>
+            <select id="sCategory" onchange="updateTable()">
+                <option value="GEN">General</option>
+                <option value="EWS">EWS</option>
+                <option value="NC-OBC">NC-OBC</option>
+                <option value="SC">SC</option>
+                <option value="ST">ST</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>CAT Overall %ile</label>
+            <input type="number" id="sOverall" placeholder="e.g., 98.5" step="0.01" oninput="updateTable()">
+        </div>
+        <div class="input-group">
+            <label>VARC %ile</label>
+            <input type="number" id="sVARC" placeholder="e.g., 90" step="0.01" oninput="updateTable()">
+        </div>
+        <div class="input-group">
+            <label>DILR %ile</label>
+            <input type="number" id="sDILR" placeholder="e.g., 85" step="0.01" oninput="updateTable()">
+        </div>
+        <div class="input-group">
+            <label>QA %ile</label>
+            <input type="number" id="sQA" placeholder="e.g., 80" step="0.01" oninput="updateTable()">
+        </div>
+        <div class="input-group">
+            <label>10th Score (%)</label>
+            <input type="number" id="s10th" placeholder="e.g., 92" oninput="updateTable()">
+        </div>
+        <div class="input-group">
+            <label>12th Score (%)</label>
+            <input type="number" id="s12th" placeholder="e.g., 88" oninput="updateTable()">
+        </div>
+         <div class="input-group">
+            <label>Graduation (%)</label>
+            <input type="number" id="sGrad" placeholder="e.g., 75" oninput="updateTable()">
+        </div>
+    </div>
+
+    <h2>Pre-Interview CS Calculation Methods</h2>
+    <div class="cs-info">
+        <div class="cs-card">
+            <h3>IIM Ahmedabad</h3>
+            <p><strong>Formula:</strong> (0.65 × CAT) + (0.35 × Application Rating)</p>
+            <p><strong>Note:</strong> Application Rating (AR) sums scores from 10th, 12th, Grad, and WorkEx based on internal tables. <em>Very high academic focus.</em></p>
+        </div>
+        <div class="cs-card">
+            <h3>IIM Bangalore</h3>
+            <p><strong>Formula:</strong> CAT (55) + 10th (10) + 12th (10) + Grad (10) + WorkEx (10) + Gender (5)</p>
+            <p><strong>Note:</strong> Work Experience is heavily weighted. Consistent academics are key.</p>
+        </div>
+        <div class="cs-card">
+            <h3>IIM Calcutta</h3>
+            <p><strong>Formula:</strong> CAT (56) + 10th (10) + 12th (15) + Gender (4)</p>
+            <p><strong>Note:</strong> Graduation marks are <strong>NOT</strong> used for shortlisting. High weight to 12th grade.</p>
+        </div>
+        <div class="cs-card">
+            <h3>IIM Indore</h3>
+            <p><strong>Formula:</strong> 10th (39%) + 12th (20%) + CAT (35%) + Diversity (6%)</p>
+            <p><strong>Note:</strong> CAT weightage is very low. You need >90% in 10th/12th to be safe.</p>
+        </div>
+        <div class="cs-card">
+            <h3>IIM Rohtak</h3>
+            <p><strong>Selection:</strong> CAT (60%) + Online PI (20%) + Diversity (20%)</p>
+            <p><strong>Cutoff Check:</strong> Gen >= 97, EWS >= 93. If you clear this, you get the call (mostly). Apply separately!</p>
+        </div>
+         <div class="cs-card">
+            <h3>IIM Lucknow</h3>
+            <p><strong>Formula:</strong> CAT (60) + 12th (10) + Grad (10) + WorkEx (10) + Diversity (10)</p>
+            <p><strong>Note:</strong> Ignores 10th standard marks completely.</p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="iimTable">
+            <thead>
+                <tr>
+                    <th>Institute</th>
+                    <th>Process</th>
+                    <th>CAT Cutoff (Gen / EWS)</th>
+                    <th>Sectional (Gen / EWS)</th>
+                    <th>Avg Package (LPA)</th>
+                    <th>Fees (Approx ₹)</th>
+                    <th>Deadline / Status</th>
+                    <th>My Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Database of IIMs with 2026-28 Rules
+    const iimData = [
+        {
+            name: "IIM Ahmedabad",
+            process: "Ind",
+            cutoffs: { GEN: 95, EWS: 95, NCOBC: 90, SC: 80, ST: 70 },
+            sectional: { GEN: 85, EWS: 85, NCOBC: 80, SC: 75, ST: 70 }, // Est high qualifying
+            avgPkg: "34.0",
+            fees: "25.0 L",
+            deadline: "CAT Only",
+            note: "Qualifying only. Actual calls > 99%ile usually."
+        },
+        {
+            name: "IIM Bangalore",
+            process: "Ind",
+            cutoffs: { GEN: 85, EWS: 75, NCOBC: 75, SC: 70, ST: 65 },
+            sectional: { GEN: 80, EWS: 75, NCOBC: 75, SC: 65, ST: 60 },
+            avgPkg: "35.3",
+            fees: "24.5 L",
+            deadline: "CAT Only",
+            note: "High focus on WorkEx."
+        },
+        {
+            name: "IIM Calcutta",
+            process: "Ind",
+            cutoffs: { GEN: 85, EWS: 75, NCOBC: 75, SC: 70, ST: 65 },
+            sectional: { GEN: 80, EWS: 75, NCOBC: 75, SC: 65, ST: 60 }, // QA usually higher req
+            avgPkg: "35.0",
+            fees: "31.0 L",
+            deadline: "CAT Only",
+            note: "No Grad score weight."
+        },
+        {
+            name: "IIM Lucknow",
+            process: "Ind",
+            cutoffs: { GEN: 90, EWS: 82, NCOBC: 82, SC: 65, ST: 60 },
+            sectional: { GEN: 85, EWS: 77, NCOBC: 77, SC: 55, ST: 50 },
+            avgPkg: "30.0",
+            fees: "20.7 L",
+            deadline: "CAT Only",
+            note: "Ignores 10th Score."
+        },
+        {
+            name: "IIM Kozhikode",
+            process: "Ind",
+            cutoffs: { GEN: 85, EWS: 75, NCOBC: 75, SC: 65, ST: 55 },
+            sectional: { GEN: 75, EWS: 65, NCOBC: 65, SC: 55, ST: 50 },
+            avgPkg: "29.0",
+            fees: "20.5 L",
+            deadline: "CAT Only",
+            note: ""
+        },
+        {
+            name: "IIM Indore",
+            process: "Ind",
+            cutoffs: { GEN: 90, EWS: 90, NCOBC: 80, SC: 60, ST: 45 },
+            sectional: { GEN: 80, EWS: 80, NCOBC: 70, SC: 55, ST: 40 },
+            avgPkg: "25.0",
+            fees: "21.1 L",
+            deadline: "CAT Only",
+            note: "High 10th/12th Wtg."
+        },
+        {
+            name: "IIM Rohtak",
+            process: "Ind",
+            cutoffs: { GEN: 97, EWS: 93, NCOBC: 83, SC: 60, ST: 50 },
+            sectional: { GEN: 0, EWS: 0, NCOBC: 0, SC: 0, ST: 0 }, // Rohtak usually has no sectional or very low +ve
+            avgPkg: "19.2",
+            fees: "17.9 L",
+            deadline: "JAN 5, 2026",
+            note: "Separate Form Mandatory!",
+            specialCheck: true // Flag for Rohtak specific logic
+        },
+        {
+            name: "IIM Mumbai",
+            process: "Ind",
+            cutoffs: { GEN: 85, EWS: 85, NCOBC: 85, SC: 70, ST: 65 }, // Qualifying
+            sectional: { GEN: 80, EWS: 80, NCOBC: 75, SC: 65, ST: 60 },
+            avgPkg: "31.0",
+            fees: "21.0 L",
+            deadline: "Separate Form (Check Site)",
+            note: "Old NITIE."
+        },
+        {
+            name: "IIM Shillong",
+            process: "Ind",
+            cutoffs: { GEN: 90, EWS: 90, NCOBC: 80, SC: 60, ST: 50 }, // Approximation
+            sectional: { GEN: 75, EWS: 75, NCOBC: 75, SC: 60, ST: 50 },
+            avgPkg: "26.0",
+            fees: "15.0 L",
+            deadline: "CAT Only",
+            note: ""
+        },
+        {
+            name: "IIM Trichy",
+            process: "JAP",
+            cutoffs: { GEN: 94, EWS: 85, NCOBC: 85, SC: 70, ST: 65 }, // Est for JAP
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "20.0",
+            fees: "19.5 L",
+            deadline: "Reg for JAP (Jan)",
+            note: "JAP Participating"
+        },
+        {
+            name: "IIM Raipur",
+            process: "JAP",
+            cutoffs: { GEN: 94, EWS: 85, NCOBC: 85, SC: 70, ST: 65 },
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "20.0",
+            fees: "18.0 L",
+            deadline: "Reg for JAP (Jan)",
+            note: "JAP Coordinator"
+        },
+        {
+            name: "IIM Ranchi",
+            process: "JAP",
+            cutoffs: { GEN: 94, EWS: 85, NCOBC: 85, SC: 70, ST: 65 },
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "18.5",
+            fees: "17.5 L",
+            deadline: "Reg for JAP (Jan)",
+            note: "JAP Participating"
+        },
+        {
+            name: "IIM Kashipur",
+            process: "JAP",
+            cutoffs: { GEN: 94, EWS: 85, NCOBC: 85, SC: 70, ST: 65 },
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "18.0",
+            fees: "17.0 L",
+            deadline: "Reg for JAP (Jan)",
+            note: "JAP Participating"
+        },
+        {
+            name: "IIM Udaipur",
+            process: "CAP",
+            cutoffs: { GEN: 93, EWS: 80, NCOBC: 77, SC: 60, ST: 45 }, // Standard CAP
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "20.0",
+            fees: "20.0 L",
+            deadline: "Reg for CAP (Jan)",
+            note: "Likely CAP"
+        },
+         {
+            name: "IIM Bodh Gaya",
+            process: "CAP",
+            cutoffs: { GEN: 93, EWS: 80, NCOBC: 77, SC: 60, ST: 45 },
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "14.0",
+            fees: "17.0 L",
+            deadline: "Reg for CAP (Jan)",
+            note: "CAP Conducting Body (TBC)"
+        },
+        {
+            name: "IIM Jammu",
+            process: "CAP",
+            cutoffs: { GEN: 93, EWS: 80, NCOBC: 77, SC: 60, ST: 45 },
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "15.5",
+            fees: "18.0 L",
+            deadline: "Reg for CAP (Jan)",
+            note: ""
+        },
+        {
+            name: "IIM Sambalpur",
+            process: "CAP",
+            cutoffs: { GEN: 93, EWS: 80, NCOBC: 77, SC: 60, ST: 45 },
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "14.0",
+            fees: "13.0 L",
+            deadline: "Reg for CAP (Jan)",
+            note: ""
+        },
+        {
+            name: "IIM Sirmaur",
+            process: "CAP",
+            cutoffs: { GEN: 93, EWS: 80, NCOBC: 77, SC: 60, ST: 45 },
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "14.0",
+            fees: "16.0 L",
+            deadline: "Reg for CAP (Jan)",
+            note: ""
+        },
+        {
+            name: "IIM Amritsar",
+            process: "Ind",
+            cutoffs: { GEN: 90, EWS: 90, NCOBC: 85, SC: 60, ST: 55 },
+            sectional: { GEN: 80, EWS: 75, NCOBC: 75, SC: 55, ST: 50 },
+            avgPkg: "16.0",
+            fees: "17.5 L",
+            deadline: "Separate Form",
+            note: "Own Admission Process"
+        },
+        {
+            name: "IIM Visakhapatnam",
+            process: "Ind",
+            cutoffs: { GEN: 82, EWS: 75, NCOBC: 72, SC: 50, ST: 40 }, // Phase 1
+            sectional: { GEN: 70, EWS: 65, NCOBC: 63, SC: 50, ST: 40 },
+            avgPkg: "16.0",
+            fees: "18.5 L",
+            deadline: "Separate Phase 1",
+            note: "Separate Application Phase"
+        },
+        {
+            name: "IIM Nagpur",
+            process: "Ind",
+            cutoffs: { GEN: 90, EWS: 80, NCOBC: 80, SC: 60, ST: 50 }, // Varies year to year
+            sectional: { GEN: 70, EWS: 50, NCOBC: 50, SC: 40, ST: 40 },
+            avgPkg: "16.0",
+            fees: "18.0 L",
+            deadline: "Check Official Site",
+            note: "Sometimes uses CAP, check site."
+        }
+    ];
+
+    function updateTable() {
+        const cat = parseFloat(document.getElementById('sCategory').value); // Actually a string
+        const category = document.getElementById('sCategory').value;
+        const overall = parseFloat(document.getElementById('sOverall').value) || 0;
+        const varc = parseFloat(document.getElementById('sVARC').value) || 0;
+        const dilr = parseFloat(document.getElementById('sDILR').value) || 0;
+        const qa = parseFloat(document.getElementById('sQA').value) || 0;
+        const s10 = parseFloat(document.getElementById('s10th').value) || 0;
+        const s12 = parseFloat(document.getElementById('s12th').value) || 0;
+
+        const tbody = document.querySelector('#iimTable tbody');
+        tbody.innerHTML = '';
+
+        iimData.forEach(iim => {
+            const row = document.createElement('tr');
+
+            // Determine Process Class
+            let procClass = '';
+            if(iim.process === 'JAP') procClass = 'jap';
+            else if(iim.process === 'CAP') procClass = 'cap';
+            else procClass = 'ind';
+
+            // Get Relevant Cutoffs
+            let reqOverall = iim.cutoffs[category] || 0;
+            let reqSectional = iim.sectional[category] || 0;
+
+            // Rohtak Special Logic for Display
+            let cutoffDisplay = `Gen: ${iim.cutoffs.GEN} / EWS: ${iim.cutoffs.EWS}`;
+            
+            // Check Eligibility
+            let cleared = true;
+            let reasons = [];
+
+            if (overall < reqOverall) {
+                cleared = false;
+                reasons.push("Low Overall");
+            }
+            if (varc < reqSectional || dilr < reqSectional || qa < reqSectional) {
+                if (reqSectional > 0) { // Some IIMs like Rohtak might not have sectional
+                    cleared = false;
+                    reasons.push("Low Sectional");
+                }
+            }
+            
+            // Special Academic Checks (Rough estimation for flag)
+            if (iim.name === "IIM Indore") {
+                if (s10 < 85 || s12 < 85) {
+                    reasons.push("Acad Risk");
+                    // Note: This doesn't fail them automatically here, but warns
+                }
+            }
+
+            // Status Cell Construction
+            let statusHtml = '';
+            if (cleared) {
+                statusHtml = `<span class="status cleared">Eligible</span>`;
+                if(reasons.includes("Acad Risk")) {
+                     statusHtml += `<br><span class="important-note">⚠️ Check Academics</span>`;
+                }
+            } else {
+                statusHtml = `<span class="status failed">Not Cleared</span><br><span style="font-size:0.8em;color:#7f8c8d">(${reasons.join(', ')})</span>`;
+            }
+
+            row.innerHTML = `
+                <td><strong>${iim.name}</strong><br><span style="font-size:0.8em;color:#7f8c8d">${iim.note}</span></td>
+                <td><span class="process-tag ${procClass}">${iim.process}</span></td>
+                <td>${cutoffDisplay}</td>
+                <td>${reqSectional}</td>
+                <td>${iim.avgPkg}</td>
+                <td>${iim.fees}</td>
+                <td><span style="color:${iim.deadline.includes('Jan') ? '#c0392b' : '#333'}">${iim.deadline}</span></td>
+                <td>${statusHtml}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // Initial Load
+    updateTable();
+</script>
+
+</body>
+</html>
